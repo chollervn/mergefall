@@ -16,6 +16,7 @@ import {
     Size,
 } from 'cc';
 import { ItemConfigHelper } from './ItemConfig';
+import { GameManager } from './GameManager';
 
 const { ccclass, property } = _decorator;
 
@@ -31,6 +32,15 @@ export class ItemTouch extends Component {
     private _hasCollided: boolean = false;  // Đánh dấu đã xử lý va chạm chưa
     private _isSpawnedFromMerge: boolean = false;  // Đánh dấu item được spawn từ merge
     private _spriteLoaded: boolean = false;  // Đánh dấu sprite đã load xong
+
+    // Thời gian item đã tồn tại (để bỏ qua check thua cho item mới spawn)
+    private _aliveTime: number = 0;
+    public static readonly SPAWN_IMMUNITY_TIME = 1.5;  // 1.5 giây miễn nhiễm sau khi spawn
+
+    // Kiểm tra item có còn trong thời gian miễn nhiễm không
+    public isImmune(): boolean {
+        return this._aliveTime < ItemTouch.SPAWN_IMMUNITY_TIME;
+    }
 
     // Thời gian delay trước khi merge (cho phép nhiều vật merge cùng lúc)
     private static readonly MERGE_DELAY = 0.15;  // 150ms
@@ -57,6 +67,16 @@ export class ItemTouch extends Component {
         if (!this._isSpawnedFromMerge) {
             this.applyScaleByType();
         }
+
+        // Reset thời gian tồn tại
+        this._aliveTime = 0;
+    }
+
+    update(dt: number) {
+        // Đếm thời gian item tồn tại
+        if (this._aliveTime < ItemTouch.SPAWN_IMMUNITY_TIME) {
+            this._aliveTime += dt;
+        }
     }
 
     // Load sprite từ config
@@ -80,15 +100,14 @@ export class ItemTouch extends Component {
         const boxCollider = this.getComponent(BoxCollider2D);
         const uiTransform = this.getComponent(UITransform);
 
+        // Bỏ qua nếu thiếu component (không cần warning)
         if (!sprite || !boxCollider) {
-            console.warn('Missing Sprite or BoxCollider2D');
             return;
         }
 
         // Lấy kích thước trực tiếp từ SpriteFrame (chính xác hơn)
         const spriteFrame = sprite.spriteFrame;
         if (!spriteFrame) {
-            console.warn('SpriteFrame not loaded yet');
             return;
         }
 
@@ -219,6 +238,11 @@ export class ItemTouch extends Component {
                             .start();
 
                         console.log('Merged to type:', nextType, 'at:', spawnLocalPos.x, spawnLocalPos.y);
+
+                        // Thông báo cho GameManager kiểm tra điều kiện thắng
+                        if (GameManager.instance) {
+                            GameManager.instance.checkWinCondition(nextType);
+                        }
                     }
                 });
             }, ItemTouch.MERGE_DELAY);

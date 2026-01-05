@@ -15,12 +15,12 @@ export interface ItemData {
 // Chỉ giữ lại: 1, 4, 5, 7, 8, 9, 10
 export const ITEM_CONFIG: ItemData[] = [
     { type: 1,  spritePath: 'items/item_s1/spriteFrame',  scale: 1.0, nextType: 2 },
-    { type: 2,  spritePath: 'items/item_s4/spriteFrame',  scale: 1.2, nextType: 3 },
-    { type: 3,  spritePath: 'items/item_s5/spriteFrame',  scale: 1.4, nextType: 4 },
-    { type: 4,  spritePath: 'items/item_s7/spriteFrame',  scale: 1.6, nextType: 5 },
-    { type: 5,  spritePath: 'items/item_s8/spriteFrame',  scale: 1.8, nextType: 6 },
-    { type: 6,  spritePath: 'items/item_s9/spriteFrame',  scale: 2.0, nextType: 7 },
-    { type: 7, spritePath: 'items/item_s10/spriteFrame', scale: 2.2, nextType: 0 },  // Max level
+    { type: 2,  spritePath: 'items/item_s2/spriteFrame',  scale: 1.2, nextType: 3 },
+    { type: 3,  spritePath: 'items/item_s3/spriteFrame',  scale: 1.4, nextType: 4 },
+    { type: 4,  spritePath: 'items/item_s4/spriteFrame',  scale: 1.6, nextType: 5 },
+    { type: 5,  spritePath: 'items/item_s5/spriteFrame',  scale: 1.8, nextType: 6 },
+    { type: 6,  spritePath: 'items/item_s6/spriteFrame',  scale: 2.0, nextType: 7 },
+    { type: 7, spritePath: 'items/item_s7/spriteFrame', scale: 2.2, nextType: 0 },  // Max level
 ];
 
 // Chỉ spawn ngẫu nhiên item type 1 (item đầu tiên)
