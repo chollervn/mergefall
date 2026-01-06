@@ -196,7 +196,7 @@
     "fileId": "15pu94dDdG6q1PQlPf5kOE"
   },
   {
-    "__type__": "cc.PolygonCollider2D",
+    "__type__": "cc.CircleCollider2D",
     "_name": "",
     "_objFlags": 0,
     "__editorExtras__": {},
@@ -218,33 +218,12 @@
       "x": 0,
       "y": 0
     },
-    "_points": [
-      {
-        "__type__": "cc.Vec2",
-        "x": -50,
-        "y": -50
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": -50,
-        "y": 50
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 50,
-        "y": 50
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 50,
-        "y": -50
-      }
-    ],
+    "_radius": 50,
     "_id": ""
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "23LulAgQ5B+Ym1eRDGloe/"
+    "fileId": "c4xu73O4tLQr/vS3A6Aowb"
   },
   {
     "__type__": "cc.PrefabInfo",

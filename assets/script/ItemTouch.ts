@@ -17,6 +17,7 @@ import {
 } from 'cc';
 import { ItemConfigHelper } from './ItemConfig';
 import { GameManager } from './GameManager';
+import { AchievementManager } from './AchievementManager';
 
 const { ccclass, property } = _decorator;
 
@@ -138,21 +139,32 @@ export class ItemTouch extends Component {
         this.node.setScale(scale, scale, 1);
     }
 
+    // Đánh dấu đã unlock achievement chưa (chỉ unlock 1 lần)
+    private _achievementUnlocked: boolean = false;
+
     onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D, _contact: IPhysics2DContact | null) {
-        // Nếu đã xử lý va chạm rồi thì bỏ qua
-        if (this._hasCollided) return;
+        // Unlock achievement khi chạm vào BẤT KỲ thứ gì (sàn, tường, item khác...)
+        if (!this._achievementUnlocked) {
+            this._achievementUnlocked = true;
+            if (AchievementManager.instance) {
+                AchievementManager.instance.unlockItem(this.itemType);
+            }
+        }
 
         // Lấy component ItemTouch của đối tượng va chạm
         const otherNode = otherCollider.node;
         const otherItemTouch = otherNode.getComponent(ItemTouch);
 
-        // Kiểm tra xem đối tượng kia có phải là ItemTouch không
+        // Nếu không phải ItemTouch thì không xử lý merge
         if (!otherItemTouch) return;
+
+        // Nếu đã xử lý va chạm merge rồi thì bỏ qua
+        if (this._hasCollided) return;
 
         // Kiểm tra xem đối tượng kia đã bị xử lý chưa
         if (otherItemTouch._hasCollided) return;
 
-        // Kiểm tra xem hai đối tượng có cùng loại không
+        // Kiểm tra xem hai đối tượng có cùng loại không (chỉ merge khi cùng loại)
         if (this.itemType !== otherItemTouch.itemType) return;
 
         // Đánh dấu cả hai đã xử lý
@@ -238,6 +250,14 @@ export class ItemTouch extends Component {
                             .start();
 
                         console.log('Merged to type:', nextType, 'at:', spawnLocalPos.x, spawnLocalPos.y);
+
+                        // Unlock achievement cho item mới
+                        console.log('AchievementManager.instance:', AchievementManager.instance);
+                        if (AchievementManager.instance) {
+                            AchievementManager.instance.unlockItem(nextType);
+                        } else {
+                            console.warn('⚠️ AchievementManager not found! Hãy gắn script vào scene.');
+                        }
 
                         // Thông báo cho GameManager kiểm tra điều kiện thắng
                         if (GameManager.instance) {
