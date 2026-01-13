@@ -16,6 +16,7 @@ import {
 } from 'cc';
 import { ItemTouch } from './ItemTouch';
 import { ItemConfigHelper } from './ItemConfig';
+import { AchievementManager } from './AchievementManager';
 
 const { ccclass, property } = _decorator;
 
@@ -64,9 +65,9 @@ export class handmove extends Component {
         // Tạo tia dọc
         this.createVerticalLine();
 
-        // Chọn ngẫu nhiên type đầu tiên từ config
+        // Chọn ngẫu nhiên type đầu tiên từ config (ban đầu chỉ có 1 hoặc 2)
         if (this.itemPrefab) {
-            this._nextItemType = ItemConfigHelper.getRandomSpawnableType();
+            this._nextItemType = this.getNextSpawnType();
             this.createPreviewItem();
         }
 
@@ -270,8 +271,22 @@ export class handmove extends Component {
         this._canSpawn = false;
         this._spawnCooldown = 0;
 
-        // Chọn type tiếp theo từ config (nhưng chưa tạo preview)
-        this._nextItemType = ItemConfigHelper.getRandomSpawnableType();
+        // Chọn type tiếp theo từ unlocked items (hoặc mặc định 1, 2 nếu chưa unlock gì)
+        this._nextItemType = this.getNextSpawnType();
+    }
+
+    /**
+     * Lấy type tiếp theo để spawn
+     * Ưu tiên random từ danh sách đã unlock, nếu chưa unlock gì thì dùng mặc định (1, 2)
+     */
+    private getNextSpawnType(): number {
+        const achievementMgr = AchievementManager.instance;
+        if (achievementMgr) {
+            const unlockedTypes = achievementMgr.getUnlockedTypes();
+            return ItemConfigHelper.getRandomSpawnableTypeFromUnlocked(unlockedTypes);
+        }
+        // Fallback về mặc định nếu không có AchievementManager
+        return ItemConfigHelper.getRandomSpawnableType();
     }
 
 

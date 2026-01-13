@@ -39,6 +39,10 @@ export class GameManager extends Component {
     // Trạng thái game
     private _isGameOver: boolean = false;
     private _maxItemType: number = 0;  // Lấy từ config
+    private _maxItemCount: number = 0;  // Số lượng item level cuối đã đạt được
+
+    // Số item level cuối cần để thắng
+    private static readonly WIN_REQUIRED_MAX_ITEMS = 3;
 
     // Thời gian delay trước khi bắt đầu kiểm tra thua (tránh thua ngay khi spawn item đầu tiên)
     private static readonly LOSE_CHECK_DELAY = 2.0;  // 2 giây delay ban đầu
@@ -101,6 +105,7 @@ export class GameManager extends Component {
         // Reset game over state
         this._isGameOver = false;
         this._activePanel = null;
+        this._maxItemCount = 0;  // Reset số item level cuối
 
         // Bắt đầu kiểm tra điều kiện thua
         this.schedule(this.checkLoseCondition, GameManager.LOSE_CHECK_INTERVAL, undefined, GameManager.LOSE_CHECK_DELAY);
@@ -189,8 +194,14 @@ export class GameManager extends Component {
 
         // Kiểm tra đã đạt max level chưa
         if (newItemType >= this._maxItemType) {
-            console.log('Max level reached! You WIN!');
-            this.onGameWin();
+            this._maxItemCount++;
+            console.log(`🌟 Max level item created! Count: ${this._maxItemCount}/${GameManager.WIN_REQUIRED_MAX_ITEMS}`);
+
+            // Chỉ thắng khi đạt đủ số lượng yêu cầu
+            if (this._maxItemCount >= GameManager.WIN_REQUIRED_MAX_ITEMS) {
+                console.log('🎉 Required max items reached! You WIN!');
+                this.onGameWin();
+            }
         }
     }
 

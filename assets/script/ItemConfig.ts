@@ -23,8 +23,8 @@ export const ITEM_CONFIG: ItemData[] = [
     { type: 7, spritePath: 'items/item_s7/spriteFrame', scale: 2.2, nextType: 0 },  // Max level
 ];
 
-// Chỉ spawn ngẫu nhiên item type 1 (item đầu tiên)
-export const SPAWNABLE_TYPES = [1,2,3,4];
+// Item spawn mặc định ban đầu (chỉ type 1 và 2)
+export const DEFAULT_SPAWNABLE_TYPES = [1, 2];
 
 // Helper functions
 export class ItemConfigHelper {
@@ -53,11 +53,39 @@ export class ItemConfigHelper {
     }
 
     /**
-     * Lấy random type từ danh sách có thể spawn
+     * Lấy random type từ danh sách mặc định (1 hoặc 2)
      */
     static getRandomSpawnableType(): number {
-        const index = Math.floor(Math.random() * SPAWNABLE_TYPES.length);
-        return SPAWNABLE_TYPES[index];
+        const index = Math.floor(Math.random() * DEFAULT_SPAWNABLE_TYPES.length);
+        return DEFAULT_SPAWNABLE_TYPES[index];
+    }
+
+    /**
+     * Lấy random type từ danh sách đã unlock
+     * Luôn đảm bảo có cả type 1 và 2 trong danh sách spawn
+     * KHÔNG spawn item level cuối (chỉ đạt được qua merge)
+     */
+    static getRandomSpawnableTypeFromUnlocked(unlockedTypes: number[]): number {
+        // Tìm max level type (item có nextType = 0)
+        const maxLevelType = ITEM_CONFIG.find(item => item.nextType === 0)?.type || 999;
+
+        // Bắt đầu với danh sách mặc định (1, 2)
+        const spawnableSet = new Set<number>(DEFAULT_SPAWNABLE_TYPES);
+
+        // Thêm các item đã unlock vào danh sách (trừ max level)
+        if (unlockedTypes && unlockedTypes.length > 0) {
+            for (const type of unlockedTypes) {
+                // Không thêm item level cuối vào danh sách spawn
+                if (type !== maxLevelType) {
+                    spawnableSet.add(type);
+                }
+            }
+        }
+
+        // Chuyển thành mảng và random
+        const spawnableArray = Array.from(spawnableSet);
+        const index = Math.floor(Math.random() * spawnableArray.length);
+        return spawnableArray[index];
     }
 
     /**

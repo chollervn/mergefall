@@ -35,12 +35,11 @@ export class AchievementManager extends Component {
     onLoad() {
         // Reset singleton khi scene reload (quan trọng!)
         AchievementManager._instance = this;
-        console.log('✅ AchievementManager initialized!');
 
         // Reset tất cả achievement khi bắt đầu game mới
         this._unlockedItems = new Set();
         localStorage.removeItem(AchievementManager.STORAGE_KEY);
-        console.log('🔄 All achievements reset on game start');
+
     }
 
     start() {
@@ -49,7 +48,7 @@ export class AchievementManager extends Component {
 
         // Nếu không có slot nào được gán, tự động tìm từ children
         if (this.itemSlots.length === 0) {
-            console.log('⚠️ No slots assigned, auto-finding from children...');
+
             this.itemSlots = [];
             for (const child of this.node.children) {
                 if (child.getComponent(Sprite)) {
@@ -63,9 +62,6 @@ export class AchievementManager extends Component {
         for (const slot of this.itemSlots) {
             if (slot) slot.active = true;
         }
-
-        console.log('🎯 AchievementManager start - slots:', this.itemSlots.length);
-
         this.loadAllSprites();
     }
 
@@ -200,6 +196,14 @@ export class AchievementManager extends Component {
      */
     public isUnlocked(itemType: number): boolean {
         return this._unlockedItems.has(itemType);
+    }
+
+    /**
+     * Lấy danh sách tất cả item types đã unlock
+     * Dùng để random spawn item từ những item đã unlock
+     */
+    public getUnlockedTypes(): number[] {
+        return Array.from(this._unlockedItems);
     }
 
     /**
