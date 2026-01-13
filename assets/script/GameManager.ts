@@ -9,8 +9,15 @@ import {
 } from 'cc';
 import { ItemTouch } from './ItemTouch';
 import { ITEM_CONFIG } from './ItemConfig';
+import { LoadingView } from './LoadingView';
 
 const { ccclass, property } = _decorator;
+
+// Global flag để skip loading khi restart (persist qua reload scene, nhưng không persist qua refresh page)
+declare global {
+    var __gameHasLoadedOnce: boolean;
+}
+globalThis.__gameHasLoadedOnce = globalThis.__gameHasLoadedOnce || false;
 
 /**
  * GameManager - Quản lý trạng thái game (thắng/thua, điểm số, restart)
@@ -35,6 +42,9 @@ export class GameManager extends Component {
 
     @property(Node)
     losePanel: Node = null!;  // Panel hiển thị khi thua
+
+    @property(Node)
+    loadingView: Node = null!;  // Loading screen
 
     // Trạng thái game
     private _isGameOver: boolean = false;
@@ -86,6 +96,20 @@ export class GameManager extends Component {
             this.setupPanel(this.losePanel);
         }
 
+        // Reset game over state
+        this._isGameOver = false;
+        this._activePanel = null;
+
+        // Hiển thị Loading Screen và đợi xong mới bắt đầu game
+        this.showLoading();
+    }
+
+    /**
+     * Bắt đầu game logic sau khi loading xong
+     */
+    private startGameLogic(): void {
+        console.log('🎮 Starting game logic...');
+
         // Debug log
         if (this.loseLineNode) {
             console.log('✓ LoseLine world Y:', this.loseLineNode.worldPosition.y);
@@ -98,13 +122,46 @@ export class GameManager extends Component {
             console.error('❌ itemContainer is NOT assigned!');
         }
 
-        // Reset game over state
-        this._isGameOver = false;
-        this._activePanel = null;
-
         // Bắt đầu kiểm tra điều kiện thua
         this.schedule(this.checkLoseCondition, GameManager.LOSE_CHECK_INTERVAL, undefined, GameManager.LOSE_CHECK_DELAY);
         console.log(`📅 Scheduled lose check every ${GameManager.LOSE_CHECK_INTERVAL}s, delay ${GameManager.LOSE_CHECK_DELAY}s`);
+    }
+
+    /**
+     * Hiển thị Loading Screen (chỉ lần đầu tiên)
+     */
+    showLoading() {
+        // Skip loading nếu đã load lần đầu rồi (restart game)
+        if (globalThis.__gameHasLoadedOnce) {
+            console.log('⏭️ Skipping loading screen (restart)');
+            // Ẩn loading view nếu có
+            if (this.loadingView) {
+                this.loadingView.active = false;
+            }
+            this.startGameLogic();
+            return;
+        }
+
+        if (!this.loadingView) {
+            console.warn('❌ loadingView is NOT assigned! Starting game immediately.');
+            globalThis.__gameHasLoadedOnce = true;
+            this.startGameLogic();
+            return;
+        }
+
+        const loadingComp = this.loadingView.getComponent(LoadingView);
+        if (loadingComp) {
+            console.log('🔄 Starting loading screen...');
+            loadingComp.startLoading(() => {
+                console.log('✅ Loading complete, game starting!');
+                globalThis.__gameHasLoadedOnce = true;
+                this.startGameLogic();
+            });
+        } else {
+            console.warn('❌ LoadingView component not found! Starting game immediately.');
+            globalThis.__gameHasLoadedOnce = true;
+            this.startGameLogic();
+        }
     }
 
     /**
